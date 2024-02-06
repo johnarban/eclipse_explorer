@@ -26,6 +26,11 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
+
+import { EclipseForm, Observer, SunBSR,BSRArray, EclipseData } from "./document";
+import { SE2001 } from "./SE2001";
+import { SE2024 } from "./SE2024";
+
 //
 // Observer constants -
 // (0) North Latitude (radians)
@@ -105,17 +110,16 @@ const month = [
   "Oct",
   "Nov",
   "Dec",
-];
+] as const;
 
-const c1: any[] = [];
-const c2: any[] = [];
-const mid: any[] = [];
-const c3: any[] = [];
-const c4: any[] = [];
+const c1: number[] = [];
+const c2: number[] = [];
+const mid: number[] = [];
+const c3: number[] = [];
+const c4: number[] = [];
 
-let currenttimeperiod = "";
-const loadedtimeperiods: string[] = [];
-import { JSEXDocument } from "./document";
+
+
 let eclipseform = {
   latd: 32,
   latm: 42,
@@ -133,33 +137,26 @@ let eclipseform = {
     options: [0, 15, 35],
   },
   tzx: {
-    selectedIndex: 1,
-    options: [
-      { text: "W", value: 1 },
-      { text: "E", value: -1 },
-    ],
+    selectedIndex: 'W',
+    options: { "W": 1 , "E": -1 },
   },
   latx: {
-    selectedIndex: 1,
-    options: [
-      { text: "N", value: 1 },
-      { text: "S", value: -1 },
-    ],
+    selectedIndex: 'N',
+    options: { "N": 1 , "S": -1 },
   },
   lonx: {
-    selectedIndex: 1,
-    options: [
-      { text: "W", value: 1 },
-      { text: "E", value: -1 },
-    ],
+    selectedIndex: 'W',
+    options: { "W": 1 , "E": -1 },
   },
   cityndx: {
     selectedIndex: 0,
     value: undefined,
   },
   loc_name: "San Diego",
-};
-const cities = [null as unknown as any];
+} as EclipseForm;
+
+
+
 
 //
 // Populate the circumstances array with the time-only dependent circumstances (x, y, d, m, ...)
@@ -233,7 +230,7 @@ function timedependent(elements: number[], circumstances: any[]) {
 // Populate the circumstances array with the time and location dependent circumstances
 function timelocdependent(elements: number[], circumstances: any[]) {
   consoleDebug("timelocdependent");
-  let ans, index, type;
+  let index, type;
 
   timedependent(elements, circumstances);
   index = obsvconst[6];
@@ -672,7 +669,7 @@ function parseFloat(value: string | number) {
 function getLatitude() {
   consoleDebug("getLatitude");
   let o = eclipseform.latd + eclipseform.latm / 60 + eclipseform.lats / 3600;
-  o = o * eclipseform.latx.options[eclipseform.latx.selectedIndex].value;
+  o = o * eclipseform.latx.options[eclipseform.latx.selectedIndex];
   return o;
 }
 
@@ -680,7 +677,7 @@ function getLatitude() {
 function getLongitude() {
   consoleDebug("getLongitude");
   let o = eclipseform.lond + eclipseform.lonm / 60 + eclipseform.lons / 3600;
-  o = o * eclipseform.lonx.options[eclipseform.lonx.selectedIndex].value;
+  o = o * eclipseform.lonx.options[eclipseform.lonx.selectedIndex];
   return o;
 }
 
@@ -689,26 +686,23 @@ function getTimezone() {
   consoleDebug("getTimezone");
   let o = eclipseform.tzm.options[eclipseform.tzm.selectedIndex];
   o = eclipseform.tzh.options[eclipseform.tzh.selectedIndex] + o / 60.0;
-  o = eclipseform.tzx.options[eclipseform.tzx.selectedIndex].value * o;
+  o = eclipseform.tzx.options[eclipseform.tzx.selectedIndex] * o;
   return o;
 }
+
+// observer type
 
 // set the observer values
 function setObserver(latDeg: number, lonDeg: number, altm: number, tz: number) {
   consoleDebug("setObserver");
-  obsvconst[0] = (latDeg * Math.PI) / 180.0;
-  obsvconst[1] = (lonDeg * Math.PI) / 180.0;
-  obsvconst[2] = altm; // in meters
-  obsvconst[3] = tz;
-
-  // Get the observer's geocentric position
-  const tmp = Math.atan(0.99664719 * Math.tan(obsvconst[0]));
-  obsvconst[4] =
-    0.99664719 * Math.sin(tmp) +
-    (obsvconst[2] / 6378140.0) * Math.sin(obsvconst[0]);
-  obsvconst[5] =
-    Math.cos(tmp) + (obsvconst[2] / 6378140.0) * Math.cos(obsvconst[0]);
+  const observer = new Observer(latDeg, lonDeg, altm, tz);
+  console.log(observer);
+  observer.getObserverConstants().forEach((value, index) => {
+    obsvconst[index] = value;
+  });
 }
+
+
 
 //
 // Read the data that's in the form, and populate the obsvconst array
@@ -795,7 +789,7 @@ function getdate(elements: number[], circumstances: any[]) {
 
 //
 // Get the local time of an event
-function gettime(elements: number[], circumstances: any[]) {
+function gettime(elements: number[], circumstances: any[]): [string, SunBSR] {
   consoleDebug("gettime");
   let t, ans, index;
 
@@ -832,29 +826,29 @@ function gettime(elements: number[], circumstances: any[]) {
   }
   if (circumstances[40] == 1) {
     // below horizon
-    return ans;
+    return [ans,'b'];
   } else if (circumstances[40] == 2) {
     // during sunrise
-    return ans + "(r)";
+    return [ans,'r'];
   } else if (circumstances[40] == 3) {
     // during sunset
-    return ans + "(s)";
+    return [ans,'s'];
   } else {
-    return ans;
+    return [ans,null];
   }
 }
 
 //
 // Get the altitude
-function getalt(circumstances: any[]) {
+function getalt(circumstances: any[]): [number, SunBSR]{
   consoleDebug("getalt");
   let t, ans;
 
   if (circumstances[40] == 2) {
-    return "0(r)";
+    return [0,'r'];
   }
   if (circumstances[40] == 3) {
-    return "0(s)";
+    return [0,'s'];
   }
   if (circumstances[32] < 0.0 && circumstances[32] >= -0.00524) {
     // Crude correction for refraction (and for consistency's sake)
@@ -863,27 +857,28 @@ function getalt(circumstances: any[]) {
     t = (circumstances[32] * 180.0) / Math.PI;
   }
   if (t < 0.0) {
-    ans = "-";
+    ans = -1;
     t = -t;
   } else {
-    ans = "";
+    ans = 1;
   }
   t = Math.floor(t + 0.5);
   if (t < 10.0) {
-    ans = ans + "0";
+    // don't neet to zero pad
+    // ans = ans + "0";
   }
-  ans = ans + t;
+  ans = ans * t;
   if (circumstances[40] == 1) {
     // below horizon
-    return ans;
+    return [ans,'b'];
   } else {
-    return ans;
+    return [ans,null];
   }
 }
 
 //
 // Get the azimuth
-function getazi(circumstances: any[]) {
+function getazi(circumstances: any[]): number {
   consoleDebug("getazi");
   let t, ans;
 
@@ -897,17 +892,19 @@ function getazi(circumstances: any[]) {
   }
   t = Math.floor(t + 0.5);
   if (t < 100.0) {
-    ans = ans + "0";
+    // don't need to zero pad
+    // ans = ans + "0";
   }
   if (t < 10.0) {
-    ans = ans + "0";
+    // don't need to zero pad
+    // ans = ans + "0";
   }
   ans = ans + t;
   if (circumstances[40] == 1) {
     // below horizon
-    return ans;
+    return t;
   } else {
-    return ans;
+    return t;
   }
 }
 
@@ -943,35 +940,36 @@ function getduration() {
 
 //
 // Get the magnitude
-function getmagnitude() {
+function getmagnitude(): [number, SunBSR] {
   consoleDebug("getmagnitude");
-  let a, mag;
+  let a;
 
   a = Math.floor(1000.0 * mid[37] + 0.5) / 1000.0;
   if (mid[40] == 1) {
-    mag = a;
+    // below horizon
+    return [a,'b'];
   }
   if (mid[40] == 2) {
     // during sunrise
-    mag = a + "(r)";
+    return [a,'r'];
   }
   if (mid[40] == 3) {
     // during sunset
-    mag = a + "(s)";
+    return [a,'s'];
   }
-  return mag;
+  return [a,null];
 }
 
 //
 // Get the coverage
-function getcoverage() {
+function getcoverage(): [number, SunBSR]{
   consoleDebug("getcoverage");
-  let a, b, c;
+  let a, b, c : number;
 
   if (mid[37] <= 0.0) {
-    a = "0.0";
+    a = 0;
   } else if (mid[37] >= 1.0) {
-    a = "1.000";
+    a = 1.000;
   } else {
     if (mid[39] == 2) {
       c = mid[38] * mid[38];
@@ -990,63 +988,45 @@ function getcoverage() {
   }
   if (mid[40] == 1) {
     // below horizon
-    return a;
+    return [a,'b'];
   }
   if (mid[40] == 2) {
     // during sunrise
-    a = a + "(r)";
+    a = [a,"r"];
   }
   if (mid[40] == 3) {
     // during sunset
-    a = a + "(s)";
+    a = [a,"s"];
   }
-  return a;
+  return [a as number,null];
 }
 
-function clearoldresults() {
-  consoleDebug("clearoldresults");
-  return;
-}
 
 // CALCULATE!
 function calculatefor(el: number[]) {
   consoleDebug("calculatefor");
-  readform();
-  clearoldresults();
+  
+  let results = [] as EclipseData[];
 
-  const o = {
-    date: "",
-    type: "",
-    partialStart: "",
-    sunAltStart: "",
-    centralTime: "",
-    maxTime: "",
-    maxAlt: "",
-    maxAzi: "",
-    centralEnd: "",
-    partialEnd: "",
-    sunAltEnd: "",
-    magnitude: "",
-    duration: "",
-  } as Record<string, string | number>;
-
-  // ("Calendar Date"));
-  // ("Eclipse Type"));
-  // ("Partial Eclipse Begins"));
-  // ("Sun Alt"));
-  // ("A or T Eclipse Begins"));
-  // ("Maximum Eclipse"));
-  // ("Sun Alt"));
-  // ("Sun Azi"));
-  // ("A or T Eclipse Ends"));
-  // ("Partial Eclipse Ends"));
-  // ("Sun Alt"));
-  // ("Eclipse Mag."));
-  // ("Eclipse Obs."));
-  // ("A or T Eclipse Duration"));
+  const emptyEclipse = {
+    date: "",            // ("Calendar Date"));
+    type: "" as 'P' | 'A' | 'T' | "",            // ("Eclipse Type"));
+    partialStart: [] as BSRArray,    // ("Partial Eclipse Begins"));
+    sunAltStart: [] as BSRArray,     // ("Sun Alt"));
+    centralTime: [] as BSRArray,     // ("A or T Eclipse Begins"));
+    maxTime: [] as BSRArray,         // ("Maximum Eclipse"));
+    maxAlt: [] as BSRArray,          // ("Sun Alt"));
+    maxAzi: 0,          // ("Sun Azi"));
+    centralEnd: [] as BSRArray,      // ("A or T Eclipse Ends"));
+    partialEnd: [] as BSRArray,      // ("Partial Eclipse Ends"));
+    sunAltEnd: [] as BSRArray,       // ("Sun Alt"));
+    magnitude: [] as BSRArray,       // ("Eclipse Mag."));
+    coverage: [] as BSRArray,        // ("Eclipse Obscuration"));
+    duration: "",        // ("A or T Eclipse Duration"));
+  } as EclipseData;
 
   for (let i = 0; i < el.length; i += 28) {
-    let val, row, td, tbody;
+    const o = {...emptyEclipse};
     obsvconst[6] = i;
     getall(el);
     // Is there an event...
@@ -1072,7 +1052,7 @@ function calculatefor(el: number[]) {
       if (mid[39] > 1 && c2[40] != 4) {
         o.centralTime = gettime(el, c2);
       } else {
-        val = null;
+        o.centralTime = ['', null];
       }
 
       // Maximum eclipse time
@@ -1084,9 +1064,10 @@ function calculatefor(el: number[]) {
 
       // Central eclipse ends
       if (mid[39] > 1 && c3[40] != 4) {
+        // if we are in P, A, or T
         o.centralEnd = gettime(el, c3);
       } else {
-        o.centralEnd = "";
+        o.centralEnd = ["",null];
       }
 
       // Partial eclipse ends
@@ -1098,7 +1079,9 @@ function calculatefor(el: number[]) {
         o.sunAltEnd = getalt(c4);
       }
       // Eclipse magnitude
-      o.magnitude = getcoverage();
+      o.magnitude = getmagnitude();
+      // Eclipse coverage
+      o.coverage = getcoverage();
 
       if (mid[39] > 1) {
         o.duration = getduration();
@@ -1106,84 +1089,19 @@ function calculatefor(el: number[]) {
         o.duration = "";
       }
     }
-    console.log(o);
+    results.push(o);
+    consoleDebug(o);
   }
+  return results;
 }
 
-function init() {}
 
-function citychange() {
-  clearoldresults();
-  let index = Number(eclipseform.cityndx.value);
-  if (index <= 0) return;
-  let hemisphere = 0;
-  eclipseform.loc_name = cities[index++];
-  let val = cities[index++];
-  if (val < 0) {
-    val = -val;
-    hemisphere = 1;
-  }
-  eclipseform.latd = val;
-  val = cities[index++];
-  if (val < 0) {
-    val = -val;
-    hemisphere = 1;
-  }
-  eclipseform.latm = val;
-  val = cities[index++];
-  if (val < 0) {
-    val = -val;
-    hemisphere = 1;
-  }
-  eclipseform.lats = val;
-  eclipseform.latx.selectedIndex = hemisphere;
-  hemisphere = 0;
-  val = cities[index++];
-  if (val < 0) {
-    val = -val;
-    hemisphere = 1;
-  }
-  eclipseform.lond = val;
-  val = cities[index++];
-  if (val < 0) {
-    val = -val;
-    hemisphere = 1;
-  }
-  eclipseform.lonm = val;
-  val = cities[index++];
-  if (val < 0) {
-    val = -val;
-    hemisphere = 1;
-  }
-  eclipseform.lons = val;
-  eclipseform.lonx.selectedIndex = hemisphere;
-  eclipseform.alt = cities[index++];
-  val = cities[index];
-  if (val < 0) {
-    eclipseform.tzx.selectedIndex = 1;
-    val = -val;
-  } else {
-    eclipseform.tzx.selectedIndex = 0;
-  }
-  eclipseform.tzh.selectedIndex = Math.floor(val);
-  eclipseform.tzm.selectedIndex = Math.floor(
-    4 * (val - eclipseform.tzh.selectedIndex) + 0.5
-  );
-}
 
-function newloc() {
-  eclipseform.cityndx.selectedIndex = 0;
-  clearoldresults();
-}
-
-import { SE2001 } from "./SE2001";
-
-function settimeperiod(timeperiod: string) {
-  recalculate();
-}
 
 function recalculate() {
-  calculatefor(SE2001());
+  readform();
+  const result = calculatefor(SE2024());
+  console.log(result);
 }
 
 const DEBUG = false;
