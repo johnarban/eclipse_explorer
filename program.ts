@@ -27,7 +27,7 @@ GNU General Public License for more details.
 */
 
 
-import { EclipseForm, Observer, SunBSR,BSRArray, EclipseData } from "./document";
+import { EclipseForm, Observer, SunBSR,BSRArray, EclipseData } from "./eclipse_types";
 import { SE2001 } from "./SE2001";
 import { SE2024 } from "./SE2024";
 
@@ -1112,4 +1112,25 @@ function consoleDebug(...data: any[]) {
   }
 }
 
-recalculate();
+// recalculate();
+
+
+function recalculateForObserver(latDeg: number, latDir: 'N' | 'S', lonDeg: number, lonDir: 'E' | 'W', alt: number, tz: number, tzDir: 'W' | 'E') {
+  const latSign = eclipseform.latx.options[latDir]
+  const lonSign = eclipseform.lonx.options[lonDir]
+  const tzSign = eclipseform.tzx.options[tzDir]
+  setObserver(latSign * Math.abs(latDeg), lonSign * Math.abs(lonDeg), alt, tzSign * Math.abs(tz));
+  const result = calculatefor(SE2024());
+  console.log(result);
+}
+
+function recalculateForObserverUTC(latDeg: number, latDir: 'N' | 'S', lonDeg: number, lonDir: 'E' | 'W', alt: number) {
+  const latSign = eclipseform.latx.options[latDir]
+  const lonSign = eclipseform.lonx.options[lonDir]
+  setObserver(latSign * Math.abs(latDeg), lonSign * Math.abs(lonDeg), alt, 0);
+  const result = calculatefor(SE2024());
+  console.log(result);
+}
+
+// only run the following code if we are in a node environment
+recalculateForObserverUTC(32.783, 'N', 96.800, 'W', 137); // Dallas, TX
