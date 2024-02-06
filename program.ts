@@ -26,7 +26,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
-
 //
 // Observer constants -
 // (0) North Latitude (radians)
@@ -93,8 +92,20 @@ const obsvconst: any[] = [];
 //      (0 = above horizon, 1 = below horizon, 2 = sunrise, 3 = sunset, 4 = below horizon, disregard)
 //
 
-const month = ["Jan","Feb","Mar","Apr","May","Jun","Jul",
-                      "Aug","Sep","Oct","Nov","Dec"];
+const month = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
 
 const c1: any[] = [];
 const c2: any[] = [];
@@ -102,183 +113,208 @@ const mid: any[] = [];
 const c3: any[] = [];
 const c4: any[] = [];
 
-
 let currenttimeperiod = "";
 const loadedtimeperiods: string[] = [];
-import { JSEXDocument } from './document';
-let eclipseform  = {
-    latd: 32,
-    latm: 42,
-    lats: 0,
-    lond: 117,
-    lonm: 9,
-    lons: 0,
-    alt:  4,
-    tzh: {
-      selectedIndex: 8,
-      options: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]
-    },
-    tzm: {
-      selectedIndex: 0,
-      options: [0,15,35]
-    },
-    tzx: {
-      selectedIndex: 1,
-      options: [{'text': 'W','value': 1 }, {'text': 'E', 'value': -1 }]
-    },
-    latx: {
-      selectedIndex: 1,
-      options: [{ 'text': 'N','value': 1 }, {'text': 'S', 'value': -1 }]
-    },
-    lonx: {
-      selectedIndex: 1,
-      options: [{ 'text': 'W','value': 1 }, {'text': 'E', 'value': -1 }]
-    },
-    cityndx: {
-      selectedIndex: 0,
-      value: undefined
-    },
-    loc_name: 'San Diego'
+import { JSEXDocument } from "./document";
+let eclipseform = {
+  latd: 32,
+  latm: 42,
+  lats: 0,
+  lond: 117,
+  lonm: 9,
+  lons: 0,
+  alt: 4,
+  tzh: {
+    selectedIndex: 8,
+    options: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+  },
+  tzm: {
+    selectedIndex: 0,
+    options: [0, 15, 35],
+  },
+  tzx: {
+    selectedIndex: 1,
+    options: [
+      { text: "W", value: 1 },
+      { text: "E", value: -1 },
+    ],
+  },
+  latx: {
+    selectedIndex: 1,
+    options: [
+      { text: "N", value: 1 },
+      { text: "S", value: -1 },
+    ],
+  },
+  lonx: {
+    selectedIndex: 1,
+    options: [
+      { text: "W", value: 1 },
+      { text: "E", value: -1 },
+    ],
+  },
+  cityndx: {
+    selectedIndex: 0,
+    value: undefined,
+  },
+  loc_name: "San Diego",
 };
-const cities = [null as unknown as any]
+const cities = [null as unknown as any];
 
 //
 // Populate the circumstances array with the time-only dependent circumstances (x, y, d, m, ...)
 function timedependent(elements: number[], circumstances: any[]) {
-  consoleDebug('timedependent');
+  consoleDebug("timedependent");
   let type, index, t, ans;
 
-  t = circumstances[1]
-  index = obsvconst[6]
+  t = circumstances[1];
+  index = obsvconst[6];
   // Calculate x
-  ans = elements[9+index] * t + elements[8+index]
-  ans = ans * t + elements[7+index]
-  ans = ans * t + elements[6+index]
-  circumstances[2] = ans
+  ans = elements[9 + index] * t + elements[8 + index];
+  ans = ans * t + elements[7 + index];
+  ans = ans * t + elements[6 + index];
+  circumstances[2] = ans;
   // Calculate dx
-  ans = 3.0 * elements[9+index] * t + 2.0 * elements[8+index]
-  ans = ans * t + elements[7+index]
-  circumstances[10] = ans
+  ans = 3.0 * elements[9 + index] * t + 2.0 * elements[8 + index];
+  ans = ans * t + elements[7 + index];
+  circumstances[10] = ans;
   // Calculate y
-  ans = elements[13+index] * t + elements[12+index]
-  ans = ans * t + elements[11+index]
-  ans = ans * t + elements[10+index]
-  circumstances[3] = ans
+  ans = elements[13 + index] * t + elements[12 + index];
+  ans = ans * t + elements[11 + index];
+  ans = ans * t + elements[10 + index];
+  circumstances[3] = ans;
   // Calculate dy
-  ans = 3.0 * elements[13+index] * t + 2.0 * elements[12+index]
-  ans = ans * t + elements[11+index]
-  circumstances[11] = ans
+  ans = 3.0 * elements[13 + index] * t + 2.0 * elements[12 + index];
+  ans = ans * t + elements[11 + index];
+  circumstances[11] = ans;
   // Calculate d
-  ans = elements[16+index] * t + elements[15+index]
-  ans = ans * t + elements[14+index]
-  ans = ans * Math.PI / 180.0
-  circumstances[4] = ans
+  ans = elements[16 + index] * t + elements[15 + index];
+  ans = ans * t + elements[14 + index];
+  ans = (ans * Math.PI) / 180.0;
+  circumstances[4] = ans;
   // sin d and cos d
-  circumstances[5] = Math.sin(ans)
-  circumstances[6] = Math.cos(ans)
+  circumstances[5] = Math.sin(ans);
+  circumstances[6] = Math.cos(ans);
   // Calculate dd
-  ans = 2.0 * elements[16+index] * t + elements[15+index]
-  ans = ans * Math.PI / 180.0
-  circumstances[12] = ans
+  ans = 2.0 * elements[16 + index] * t + elements[15 + index];
+  ans = (ans * Math.PI) / 180.0;
+  circumstances[12] = ans;
   // Calculate m
-  ans = elements[19+index] * t + elements[18+index]
-  ans = ans * t + elements[17+index]
+  ans = elements[19 + index] * t + elements[18 + index];
+  ans = ans * t + elements[17 + index];
   if (ans >= 360.0) {
-    ans = ans - 360.0
+    ans = ans - 360.0;
   }
-  ans = ans * Math.PI / 180.0
-  circumstances[7] = ans
+  ans = (ans * Math.PI) / 180.0;
+  circumstances[7] = ans;
   // Calculate dm
-  ans = 2.0 * elements[19+index] * t + elements[18+index]
-  ans = ans * Math.PI / 180.0
-  circumstances[13] = ans
+  ans = 2.0 * elements[19 + index] * t + elements[18 + index];
+  ans = (ans * Math.PI) / 180.0;
+  circumstances[13] = ans;
   // Calculate l1 and dl1
-  type = circumstances[0]
-  if ((type == -2) || (type == 0) || (type == 2)) {
-    ans = elements[22+index] * t + elements[21+index]
-    ans = ans * t + elements[20+index]
-    circumstances[8] = ans
-    circumstances[14] = 2.0 * elements[22+index] * t + elements[21+index]
+  type = circumstances[0];
+  if (type == -2 || type == 0 || type == 2) {
+    ans = elements[22 + index] * t + elements[21 + index];
+    ans = ans * t + elements[20 + index];
+    circumstances[8] = ans;
+    circumstances[14] = 2.0 * elements[22 + index] * t + elements[21 + index];
   }
   // Calculate l2 and dl2
-  if ((type == -1) || (type == 0) || (type == 1)) {
-    ans = elements[25+index] * t + elements[24+index]
-    ans = ans * t + elements[23+index]
-    circumstances[9] = ans
-    circumstances[15] = 2.0 * elements[25+index] * t + elements[24+index]
+  if (type == -1 || type == 0 || type == 1) {
+    ans = elements[25 + index] * t + elements[24 + index];
+    ans = ans * t + elements[23 + index];
+    circumstances[9] = ans;
+    circumstances[15] = 2.0 * elements[25 + index] * t + elements[24 + index];
   }
-  return circumstances
+  return circumstances;
 }
 
 //
 // Populate the circumstances array with the time and location dependent circumstances
-function timelocdependent(elements: number[],circumstances: any[]) {
-  consoleDebug('timelocdependent');
-  let ans, index, type
+function timelocdependent(elements: number[], circumstances: any[]) {
+  consoleDebug("timelocdependent");
+  let ans, index, type;
 
-  timedependent(elements,circumstances)
-  index = obsvconst[6]
+  timedependent(elements, circumstances);
+  index = obsvconst[6];
   // Calculate h, sin h, cos h
-  circumstances[16] = circumstances[7] - obsvconst[1] - (elements[index+5] / 13713.44)
-  circumstances[17] = Math.sin(circumstances[16])
-  circumstances[18] = Math.cos(circumstances[16])
+  circumstances[16] =
+    circumstances[7] - obsvconst[1] - elements[index + 5] / 13713.44;
+  circumstances[17] = Math.sin(circumstances[16]);
+  circumstances[18] = Math.cos(circumstances[16]);
   // Calculate xi
-  circumstances[19] = obsvconst[5] * circumstances[17]
+  circumstances[19] = obsvconst[5] * circumstances[17];
   // Calculate eta
-  circumstances[20] = obsvconst[4] * circumstances[6] - obsvconst[5] * circumstances[18] * circumstances[5]
+  circumstances[20] =
+    obsvconst[4] * circumstances[6] -
+    obsvconst[5] * circumstances[18] * circumstances[5];
   // Calculate zeta
-  circumstances[21] = obsvconst[4] * circumstances[5] + obsvconst[5] * circumstances[18] * circumstances[6]
+  circumstances[21] =
+    obsvconst[4] * circumstances[5] +
+    obsvconst[5] * circumstances[18] * circumstances[6];
   // Calculate dxi
-  circumstances[22] = circumstances[13] * obsvconst[5] * circumstances[18]
+  circumstances[22] = circumstances[13] * obsvconst[5] * circumstances[18];
   // Calculate deta
-  circumstances[23] = circumstances[13] * circumstances[19] * circumstances[5] - circumstances[21] * circumstances[12]
+  circumstances[23] =
+    circumstances[13] * circumstances[19] * circumstances[5] -
+    circumstances[21] * circumstances[12];
   // Calculate u
-  circumstances[24] = circumstances[2] - circumstances[19]
+  circumstances[24] = circumstances[2] - circumstances[19];
   // Calculate v
-  circumstances[25] = circumstances[3] - circumstances[20]
+  circumstances[25] = circumstances[3] - circumstances[20];
   // Calculate a
-  circumstances[26] = circumstances[10] - circumstances[22]
+  circumstances[26] = circumstances[10] - circumstances[22];
   // Calculate b
-  circumstances[27] = circumstances[11] - circumstances[23]
+  circumstances[27] = circumstances[11] - circumstances[23];
   // Calculate l1'
-  type = circumstances[0]
-  if ((type == -2) || (type == 0) || (type == 2)) {
-    circumstances[28] = circumstances[8] - circumstances[21] * elements[26+index]
+  type = circumstances[0];
+  if (type == -2 || type == 0 || type == 2) {
+    circumstances[28] =
+      circumstances[8] - circumstances[21] * elements[26 + index];
   }
   // Calculate l2'
-  if ((type == -1) || (type == 0) || (type == 1)) {
-    circumstances[29] = circumstances[9] - circumstances[21] * elements[27+index]
+  if (type == -1 || type == 0 || type == 1) {
+    circumstances[29] =
+      circumstances[9] - circumstances[21] * elements[27 + index];
   }
   // Calculate n^2
-  circumstances[30] = circumstances[26] * circumstances[26] + circumstances[27] * circumstances[27]
-  return circumstances
+  circumstances[30] =
+    circumstances[26] * circumstances[26] +
+    circumstances[27] * circumstances[27];
+  return circumstances;
 }
 
 //
 // Iterate on C1 or C4
-function c1c4iterate(elements: any,circumstances: any[]) {
-  consoleDebug('c1c4iterate');
-  let sign, iter, tmp, n
+function c1c4iterate(elements: any, circumstances: any[]) {
+  consoleDebug("c1c4iterate");
+  let sign, iter, tmp, n;
 
-  timelocdependent(elements,circumstances)
+  timelocdependent(elements, circumstances);
   if (circumstances[0] < 0) {
-    sign=-1.0
+    sign = -1.0;
   } else {
-    sign=1.0
+    sign = 1.0;
   }
-  tmp=1.0
-  iter=0
-  while (((tmp > 0.000001) || (tmp < -0.000001)) && (iter < 50)) {
-    n = Math.sqrt(circumstances[30])
-    tmp = circumstances[26] * circumstances[25] - circumstances[24] * circumstances[27]
-    tmp = tmp / n / circumstances[28]
-    tmp = sign * Math.sqrt(1.0 - tmp * tmp) * circumstances[28] / n
-    tmp = (circumstances[24] * circumstances[26] + circumstances[25] * circumstances[27]) / circumstances[30] - tmp
-    circumstances[1] = circumstances[1] - tmp
-    timelocdependent(elements,circumstances)
-    iter++
+  tmp = 1.0;
+  iter = 0;
+  while ((tmp > 0.000001 || tmp < -0.000001) && iter < 50) {
+    n = Math.sqrt(circumstances[30]);
+    tmp =
+      circumstances[26] * circumstances[25] -
+      circumstances[24] * circumstances[27];
+    tmp = tmp / n / circumstances[28];
+    tmp = (sign * Math.sqrt(1.0 - tmp * tmp) * circumstances[28]) / n;
+    tmp =
+      (circumstances[24] * circumstances[26] +
+        circumstances[25] * circumstances[27]) /
+        circumstances[30] -
+      tmp;
+    circumstances[1] = circumstances[1] - tmp;
+    timelocdependent(elements, circumstances);
+    iter++;
   }
-  return circumstances
+  return circumstances;
 }
 
 //
@@ -287,49 +323,55 @@ function c1c4iterate(elements: any,circumstances: any[]) {
 //   1. The mid array must be populated
 //   2. The magnitude at mid eclipse must be > 0.0
 function getc1c4(elements: any) {
-  consoleDebug('getc1c4')
-  let tmp, n
+  consoleDebug("getc1c4");
+  let tmp, n;
 
-  n = Math.sqrt(mid[30])
-  tmp = mid[26] * mid[25] - mid[24] * mid[27]
-  tmp = tmp / n / mid[28]
-  tmp = Math.sqrt(1.0 - tmp * tmp) * mid[28] / n
-  c1[0] = -2
-  c4[0] = 2
-  c1[1] = mid[1] - tmp
-  c4[1] = mid[1] + tmp
-  c1c4iterate(elements,c1)
-  c1c4iterate(elements,c4)
+  n = Math.sqrt(mid[30]);
+  tmp = mid[26] * mid[25] - mid[24] * mid[27];
+  tmp = tmp / n / mid[28];
+  tmp = (Math.sqrt(1.0 - tmp * tmp) * mid[28]) / n;
+  c1[0] = -2;
+  c4[0] = 2;
+  c1[1] = mid[1] - tmp;
+  c4[1] = mid[1] + tmp;
+  c1c4iterate(elements, c1);
+  c1c4iterate(elements, c4);
 }
 
 //
 // Iterate on C2 or C3
-function c2c3iterate(elements: any,circumstances: any[]) {
-  consoleDebug('c2c3iterate');
-  let sign, iter, tmp, n
+function c2c3iterate(elements: any, circumstances: any[]) {
+  consoleDebug("c2c3iterate");
+  let sign, iter, tmp, n;
 
-  timelocdependent(elements,circumstances)
+  timelocdependent(elements, circumstances);
   if (circumstances[0] < 0) {
-    sign=-1.0
+    sign = -1.0;
   } else {
-    sign=1.0
+    sign = 1.0;
   }
   if (mid[29] < 0.0) {
-    sign = -sign
+    sign = -sign;
   }
-  tmp=1.0
-  iter=0
-  while (((tmp > 0.000001) || (tmp < -0.000001)) && (iter < 50)) {
-    n = Math.sqrt(circumstances[30])
-    tmp = circumstances[26] * circumstances[25] - circumstances[24] * circumstances[27]
-    tmp = tmp / n / circumstances[29]
-    tmp = sign * Math.sqrt(1.0 - tmp * tmp) * circumstances[29] / n
-    tmp = (circumstances[24] * circumstances[26] + circumstances[25] * circumstances[27]) / circumstances[30] - tmp
-    circumstances[1] = circumstances[1] - tmp
-    timelocdependent(elements,circumstances)
-    iter++
+  tmp = 1.0;
+  iter = 0;
+  while ((tmp > 0.000001 || tmp < -0.000001) && iter < 50) {
+    n = Math.sqrt(circumstances[30]);
+    tmp =
+      circumstances[26] * circumstances[25] -
+      circumstances[24] * circumstances[27];
+    tmp = tmp / n / circumstances[29];
+    tmp = (sign * Math.sqrt(1.0 - tmp * tmp) * circumstances[29]) / n;
+    tmp =
+      (circumstances[24] * circumstances[26] +
+        circumstances[25] * circumstances[27]) /
+        circumstances[30] -
+      tmp;
+    circumstances[1] = circumstances[1] - tmp;
+    timelocdependent(elements, circumstances);
+    iter++;
   }
-  return circumstances
+  return circumstances;
 }
 
 //
@@ -338,138 +380,152 @@ function c2c3iterate(elements: any,circumstances: any[]) {
 //   1. The mid array must be populated
 //   2. There must be either a total or annular eclipse at the location!
 function getc2c3(elements: any) {
-  consoleDebug('getc2c3');
-  let tmp, n
+  consoleDebug("getc2c3");
+  let tmp, n;
 
-  n = Math.sqrt(mid[30])
-  tmp = mid[26] * mid[25] - mid[24] * mid[27]
-  tmp = tmp / n / mid[29]
-  tmp = Math.sqrt(1.0 - tmp * tmp) * mid[29] / n
-  c2[0] = -1
-  c3[0] = 1
+  n = Math.sqrt(mid[30]);
+  tmp = mid[26] * mid[25] - mid[24] * mid[27];
+  tmp = tmp / n / mid[29];
+  tmp = (Math.sqrt(1.0 - tmp * tmp) * mid[29]) / n;
+  c2[0] = -1;
+  c3[0] = 1;
   if (mid[29] < 0.0) {
-    c2[1] = mid[1] + tmp
-    c3[1] = mid[1] - tmp
+    c2[1] = mid[1] + tmp;
+    c3[1] = mid[1] - tmp;
   } else {
-    c2[1] = mid[1] - tmp
-    c3[1] = mid[1] + tmp
+    c2[1] = mid[1] - tmp;
+    c3[1] = mid[1] + tmp;
   }
-  c2c3iterate(elements,c2)
-  c2c3iterate(elements,c3)
+  c2c3iterate(elements, c2);
+  c2c3iterate(elements, c3);
 }
 
 //
 // Get the observational circumstances
 function observational(circumstances: any[]) {
-  consoleDebug('observational');
-  let contacttype, coslat, sinlat
+  consoleDebug("observational");
+  let contacttype, coslat, sinlat;
 
   // We are looking at an "external" contact UNLESS this is a total eclipse AND we are looking at
   // c2 or c3, in which case it is an INTERNAL contact! Note that if we are looking at mid eclipse,
   // then we may not have determined the type of eclipse (mid[39]) just yet!
   if (circumstances[0] == 0) {
-    contacttype = 1.0
+    contacttype = 1.0;
   } else {
-    if ((mid[39] == 3) && ((circumstances[0] == -1) || (circumstances[0] == 1))) {
-      contacttype = -1.0
+    if (mid[39] == 3 && (circumstances[0] == -1 || circumstances[0] == 1)) {
+      contacttype = -1.0;
     } else {
-      contacttype = 1.0
+      contacttype = 1.0;
     }
   }
   // Calculate p
-  circumstances[31] = Math.atan2(contacttype*circumstances[24], contacttype*circumstances[25])
+  circumstances[31] = Math.atan2(
+    contacttype * circumstances[24],
+    contacttype * circumstances[25]
+  );
   // Calculate alt
-  sinlat = Math.sin(obsvconst[0])
-  coslat = Math.cos(obsvconst[0])
-  circumstances[32] = Math.asin(circumstances[5] * sinlat + circumstances[6] * coslat * circumstances[18])
+  sinlat = Math.sin(obsvconst[0]);
+  coslat = Math.cos(obsvconst[0]);
+  circumstances[32] = Math.asin(
+    circumstances[5] * sinlat + circumstances[6] * coslat * circumstances[18]
+  );
   // Calculate q
-  circumstances[33] = Math.asin(coslat * circumstances[17] / Math.cos(circumstances[32]))
+  circumstances[33] = Math.asin(
+    (coslat * circumstances[17]) / Math.cos(circumstances[32])
+  );
   if (circumstances[20] < 0.0) {
-    circumstances[33] = Math.PI - circumstances[33]
+    circumstances[33] = Math.PI - circumstances[33];
   }
   // Calculate v
-  circumstances[34] = circumstances[31] - circumstances[33]
+  circumstances[34] = circumstances[31] - circumstances[33];
   // Calculate azi
-  circumstances[35] = Math.atan2(-1.0*circumstances[17]*circumstances[6], circumstances[5]*coslat - circumstances[18]*sinlat*circumstances[6])
+  circumstances[35] = Math.atan2(
+    -1.0 * circumstances[17] * circumstances[6],
+    circumstances[5] * coslat - circumstances[18] * sinlat * circumstances[6]
+  );
   // Calculate visibility
   if (circumstances[32] > -0.00524) {
-    circumstances[40] = 0
+    circumstances[40] = 0;
   } else {
-    circumstances[40] = 1
+    circumstances[40] = 1;
   }
 }
 
 //
 // Get the observational circumstances for mid eclipse
 function midobservational() {
-  consoleDebug('midobservational');
-  observational(mid)
+  consoleDebug("midobservational");
+  observational(mid);
   // Calculate m, magnitude and moon/sun
-  mid[36] = Math.sqrt(mid[24]*mid[24] + mid[25]*mid[25])
-  mid[37] = (mid[28] - mid[36]) / (mid[28] + mid[29])
-  mid[38] = (mid[28] - mid[29]) / (mid[28] + mid[29])
+  mid[36] = Math.sqrt(mid[24] * mid[24] + mid[25] * mid[25]);
+  mid[37] = (mid[28] - mid[36]) / (mid[28] + mid[29]);
+  mid[38] = (mid[28] - mid[29]) / (mid[28] + mid[29]);
 }
 
 //
 // Calculate mid eclipse
 function getmid(elements: any) {
-  consoleDebug('getmid');
-  let iter, tmp
+  consoleDebug("getmid");
+  let iter, tmp;
 
-  mid[0] = 0
-  mid[1] = 0.0
-  iter = 0
-  tmp = 1.0
-  timelocdependent(elements,mid)
-  while (((tmp > 0.000001) || (tmp < -0.000001)) && (iter < 50)) {
-    tmp = (mid[24] * mid[26] + mid[25] * mid[27]) / mid[30]
-    mid[1] = mid[1] - tmp
-    iter++
-    timelocdependent(elements,mid)
+  mid[0] = 0;
+  mid[1] = 0.0;
+  iter = 0;
+  tmp = 1.0;
+  timelocdependent(elements, mid);
+  while ((tmp > 0.000001 || tmp < -0.000001) && iter < 50) {
+    tmp = (mid[24] * mid[26] + mid[25] * mid[27]) / mid[30];
+    mid[1] = mid[1] - tmp;
+    iter++;
+    timelocdependent(elements, mid);
   }
 }
 
 //
 // Calculate the time of sunrise or sunset
-function getsunriset(elements: any,circumstances: number[],riset: number) {
-  consoleDebug('getsunriset')
-  let h0, diff, iter
+function getsunriset(elements: any, circumstances: number[], riset: number) {
+  consoleDebug("getsunriset");
+  let h0, diff, iter;
 
-  diff = 1.0
-  iter = 0
-  while ((diff > 0.00001) || (diff < -0.00001)) {
-    iter++
-    if (iter == 4) return
-    h0 = Math.acos((Math.sin(-0.00524) - Math.sin(obsvconst[0]) * circumstances[5])/Math.cos(obsvconst[0])/circumstances[6])
-    diff = (riset * h0 - circumstances[16])/circumstances[13];
+  diff = 1.0;
+  iter = 0;
+  while (diff > 0.00001 || diff < -0.00001) {
+    iter++;
+    if (iter == 4) return;
+    h0 = Math.acos(
+      (Math.sin(-0.00524) - Math.sin(obsvconst[0]) * circumstances[5]) /
+        Math.cos(obsvconst[0]) /
+        circumstances[6]
+    );
+    diff = (riset * h0 - circumstances[16]) / circumstances[13];
     while (diff >= 12.0) diff -= 24.0;
     while (diff <= -12.0) diff += 24.0;
-    circumstances[1] += diff
-    timelocdependent(elements,circumstances)
+    circumstances[1] += diff;
+    timelocdependent(elements, circumstances);
   }
 }
 
 //
 // Calculate the time of sunrise
-function getsunrise(elements: any,circumstances: any[]) {
-  consoleDebug('getsunrise');
-  getsunriset(elements,circumstances,-1.0)
+function getsunrise(elements: any, circumstances: any[]) {
+  consoleDebug("getsunrise");
+  getsunriset(elements, circumstances, -1.0);
 }
 
 //
 // Calculate the time of sunset
-function getsunset(elements: any,circumstances: any[]) {
-  consoleDebug('getsunset');
-  getsunriset(elements,circumstances,1.0)
+function getsunset(elements: any, circumstances: any[]) {
+  consoleDebug("getsunset");
+  getsunriset(elements, circumstances, 1.0);
 }
 
 //
 // Copy a set of circumstances
 function copycircumstances(circumstancesfrom: any[], circumstancesto: any[]) {
-  consoleDebug('copycircumstances');
+  consoleDebug("copycircumstances");
   let i;
 
-  for (i = 1 ; i < 41 ; i++) {
+  for (i = 1; i < 41; i++) {
     circumstancesto[i] = circumstancesfrom[i];
   }
 }
@@ -477,212 +533,231 @@ function copycircumstances(circumstancesfrom: any[], circumstancesto: any[]) {
 //
 // Populate the c1, c2, mid, c3 and c4 arrays
 function getall(elements: any) {
-  consoleDebug('getall');
-  let pattern
+  consoleDebug("getall");
+  let pattern;
 
-  getmid(elements)
-  midobservational()
+  getmid(elements);
+  midobservational();
   if (mid[37] > 0.0) {
-    getc1c4(elements)
-    if ((mid[36] < mid[29]) || (mid[36] < -mid[29])) {
-      getc2c3(elements)
+    getc1c4(elements);
+    if (mid[36] < mid[29] || mid[36] < -mid[29]) {
+      getc2c3(elements);
       if (mid[29] < 0.0) {
-        mid[39] = 3 // Total eclipse
+        mid[39] = 3; // Total eclipse
       } else {
-        mid[39] = 2 // Annular eclipse
+        mid[39] = 2; // Annular eclipse
       }
-      observational(c1)
-      observational(c2)
-      observational(c3)
-      observational(c4)
-      c2[36] = 999.9
-      c3[36] = 999.9
+      observational(c1);
+      observational(c2);
+      observational(c3);
+      observational(c4);
+      c2[36] = 999.9;
+      c3[36] = 999.9;
       // Calculate how much of the eclipse is above the horizon
-      pattern = 0
-      if (c1[40] == 0) { pattern += 10000 }
-      if (c2[40] == 0) { pattern += 1000 }
-      if (mid[40] == 0) { pattern += 100 }
-      if (c3[40] == 0) { pattern += 10 }
-      if (c4[40] == 0) { pattern += 1 }
+      pattern = 0;
+      if (c1[40] == 0) {
+        pattern += 10000;
+      }
+      if (c2[40] == 0) {
+        pattern += 1000;
+      }
+      if (mid[40] == 0) {
+        pattern += 100;
+      }
+      if (c3[40] == 0) {
+        pattern += 10;
+      }
+      if (c4[40] == 0) {
+        pattern += 1;
+      }
       // Now, time to make sure that all my observational[39] and observational[40] are OK
       if (pattern == 11110) {
-        getsunset(elements,c4)
-        observational(c4)
-        c4[40] = 3
+        getsunset(elements, c4);
+        observational(c4);
+        c4[40] = 3;
       } else if (pattern == 11100) {
-        getsunset(elements,c3)
-        observational(c3)
-        c3[40] = 3
+        getsunset(elements, c3);
+        observational(c3);
+        c3[40] = 3;
         copycircumstances(c3, c4);
       } else if (pattern == 11000) {
-        c3[40] = 4
-        getsunset(elements,mid)
-        midobservational()
-        mid[40] = 3
-        copycircumstances(mid, c4)
+        c3[40] = 4;
+        getsunset(elements, mid);
+        midobservational();
+        mid[40] = 3;
+        copycircumstances(mid, c4);
       } else if (pattern == 10000) {
-        mid[39] = 1
-        getsunset(elements,mid)
-        midobservational()
-        mid[40] = 3
-        copycircumstances(mid, c4)
+        mid[39] = 1;
+        getsunset(elements, mid);
+        midobservational();
+        mid[40] = 3;
+        copycircumstances(mid, c4);
       } else if (pattern == 1111) {
-        getsunrise(elements,c1)
-        observational(c1)
-        c1[40] = 2
+        getsunrise(elements, c1);
+        observational(c1);
+        c1[40] = 2;
       } else if (pattern == 111) {
-        getsunrise(elements,c2)
-        observational(c2)
-        c2[40] = 2
-        copycircumstances(c2, c1)
+        getsunrise(elements, c2);
+        observational(c2);
+        c2[40] = 2;
+        copycircumstances(c2, c1);
       } else if (pattern == 11) {
-        c2[40] = 4
-        getsunrise(elements,mid)
-        midobservational()
-        mid[40] = 2
-        copycircumstances(mid, c1)
+        c2[40] = 4;
+        getsunrise(elements, mid);
+        midobservational();
+        mid[40] = 2;
+        copycircumstances(mid, c1);
       } else if (pattern == 1) {
-        mid[39] = 1
-        getsunrise(elements,mid)
-        midobservational()
-        mid[40] = 2
-        copycircumstances(mid, c1)
+        mid[39] = 1;
+        getsunrise(elements, mid);
+        midobservational();
+        mid[40] = 2;
+        copycircumstances(mid, c1);
       } else if (pattern == 0) {
-        mid[39] = 0
+        mid[39] = 0;
       }
       // There are other patterns, but those are the only ones we're covering!
-   } else {
-      mid[39] = 1 // Partial eclipse
-      pattern = 0
-      observational(c1)
-      observational(c4)
-      if (c1[40] == 0) { pattern += 100 }
-      if (mid[40] == 0) { pattern += 10 }
-      if (c4[40] == 0) { pattern += 1 }
+    } else {
+      mid[39] = 1; // Partial eclipse
+      pattern = 0;
+      observational(c1);
+      observational(c4);
+      if (c1[40] == 0) {
+        pattern += 100;
+      }
+      if (mid[40] == 0) {
+        pattern += 10;
+      }
+      if (c4[40] == 0) {
+        pattern += 1;
+      }
       if (pattern == 110) {
-        getsunset(elements,c4)
-        observational(c4)
-        c4[40] = 3
+        getsunset(elements, c4);
+        observational(c4);
+        c4[40] = 3;
       } else if (pattern == 100) {
-        getsunset(elements,mid)
-        midobservational()
-        mid[40] = 3
-        copycircumstances(mid, c4)
+        getsunset(elements, mid);
+        midobservational();
+        mid[40] = 3;
+        copycircumstances(mid, c4);
       } else if (pattern == 11) {
-        getsunrise(elements,c1)
-        observational(c1)
-        c1[40] = 2
+        getsunrise(elements, c1);
+        observational(c1);
+        c1[40] = 2;
       } else if (pattern == 1) {
-        getsunrise(elements,mid)
-        midobservational()
-        mid[40] = 2
-        copycircumstances(mid, c1)
+        getsunrise(elements, mid);
+        midobservational();
+        mid[40] = 2;
+        copycircumstances(mid, c1);
       } else if (pattern == 0) {
-        mid[39]=0
+        mid[39] = 0;
       }
       // There are other patterns, but those are the only ones we're covering!
     }
   } else {
-    mid[39] = 0 // No eclipse
+    mid[39] = 0; // No eclipse
   }
   // Magnitude for total and annular eclipse is moon/sun ratio
-  if ((mid[39] == 2) || (mid[39] == 3)) {
-     mid[37] = mid[38]
+  if (mid[39] == 2 || mid[39] == 3) {
+    mid[37] = mid[38];
   }
 }
 
 function parseFloat(value: string | number) {
-  consoleDebug('parseFloat');
-  return Number(value)
+  consoleDebug("parseFloat");
+  return Number(value);
 }
-
-
 
 // get the latitude
 function getLatitude() {
-  consoleDebug('getLatitude');
-  let o = eclipseform.latd + eclipseform.latm/60 + eclipseform.lats/3600
-  o = o * eclipseform.latx.options[eclipseform.latx.selectedIndex].value
-  return o
+  consoleDebug("getLatitude");
+  let o = eclipseform.latd + eclipseform.latm / 60 + eclipseform.lats / 3600;
+  o = o * eclipseform.latx.options[eclipseform.latx.selectedIndex].value;
+  return o;
 }
 
 // get the longitude
 function getLongitude() {
-  consoleDebug('getLongitude');
-  let o = eclipseform.lond + eclipseform.lonm/60 + eclipseform.lons/3600
-  o = o * eclipseform.lonx.options[eclipseform.lonx.selectedIndex].value
-  return o
+  consoleDebug("getLongitude");
+  let o = eclipseform.lond + eclipseform.lonm / 60 + eclipseform.lons / 3600;
+  o = o * eclipseform.lonx.options[eclipseform.lonx.selectedIndex].value;
+  return o;
 }
 
 // get the timezone
 function getTimezone() {
-  consoleDebug('getTimezone');
-  let o = eclipseform.tzm.options[eclipseform.tzm.selectedIndex]
-  o = eclipseform.tzh.options[eclipseform.tzh.selectedIndex] + o/60.0
-  o = eclipseform.tzx.options[eclipseform.tzx.selectedIndex].value * o
-  return o
+  consoleDebug("getTimezone");
+  let o = eclipseform.tzm.options[eclipseform.tzm.selectedIndex];
+  o = eclipseform.tzh.options[eclipseform.tzh.selectedIndex] + o / 60.0;
+  o = eclipseform.tzx.options[eclipseform.tzx.selectedIndex].value * o;
+  return o;
 }
 
 // set the observer values
 function setObserver(latDeg: number, lonDeg: number, altm: number, tz: number) {
-  consoleDebug('setObserver');
-  obsvconst[0] = latDeg * Math.PI/180.0;
-  obsvconst[1] = lonDeg * Math.PI/180.0;
+  consoleDebug("setObserver");
+  obsvconst[0] = (latDeg * Math.PI) / 180.0;
+  obsvconst[1] = (lonDeg * Math.PI) / 180.0;
   obsvconst[2] = altm; // in meters
-  obsvconst[3] = tz
-  
-  // Get the observer's geocentric position
-  const tmp=Math.atan(0.99664719*Math.tan(obsvconst[0]))
-  obsvconst[4]=0.99664719*Math.sin(tmp)+(obsvconst[2]/6378140.0)*Math.sin(obsvconst[0])
-  obsvconst[5]=Math.cos(tmp)+(obsvconst[2]/6378140.0*Math.cos(obsvconst[0]))
-}
+  obsvconst[3] = tz;
 
+  // Get the observer's geocentric position
+  const tmp = Math.atan(0.99664719 * Math.tan(obsvconst[0]));
+  obsvconst[4] =
+    0.99664719 * Math.sin(tmp) +
+    (obsvconst[2] / 6378140.0) * Math.sin(obsvconst[0]);
+  obsvconst[5] =
+    Math.cos(tmp) + (obsvconst[2] / 6378140.0) * Math.cos(obsvconst[0]);
+}
 
 //
 // Read the data that's in the form, and populate the obsvconst array
 function readform() {
-  consoleDebug('readform');
+  consoleDebug("readform");
 
   // Write back to the form what we are parsing
-  eclipseform.latd=Math.abs(parseFloat(eclipseform.latd))
-  eclipseform.latm=Math.abs(parseFloat(eclipseform.latm))
-  eclipseform.lats=Math.abs(parseFloat(eclipseform.lats))
-  eclipseform.lond=Math.abs(parseFloat(eclipseform.lond))
-  eclipseform.lonm=Math.abs(parseFloat(eclipseform.lonm))
-  eclipseform.lons=Math.abs(parseFloat(eclipseform.lons))
-  eclipseform.alt=Math.abs(parseFloat(eclipseform.alt))
+  eclipseform.latd = Math.abs(parseFloat(eclipseform.latd));
+  eclipseform.latm = Math.abs(parseFloat(eclipseform.latm));
+  eclipseform.lats = Math.abs(parseFloat(eclipseform.lats));
+  eclipseform.lond = Math.abs(parseFloat(eclipseform.lond));
+  eclipseform.lonm = Math.abs(parseFloat(eclipseform.lonm));
+  eclipseform.lons = Math.abs(parseFloat(eclipseform.lons));
+  eclipseform.alt = Math.abs(parseFloat(eclipseform.alt));
 
   // Get the latitude
-  const latDeg = getLatitude()
+  const latDeg = getLatitude();
 
   // Get the longitude
-  const lonDeg = getLongitude()
+  const lonDeg = getLongitude();
 
   // Get the altitude
-  const alt = parseFloat(eclipseform.alt)
+  const alt = parseFloat(eclipseform.alt);
 
   // Get the time zone
-  const tz = getTimezone()
-  
+  const tz = getTimezone();
+
   // Set the observer
-  setObserver(latDeg, lonDeg, alt, tz)
+  setObserver(latDeg, lonDeg, alt, tz);
 
   // The index of the selected eclipse...
   //obsvconst[6] = 28 * (parseInt(eclipseform.index.options[eclipseform.index.selectedIndex].value) + 65)
-
 }
 
 //
 // Get the local date of an event
-function getdate(elements: number[] ,circumstances: any[]) {
-  consoleDebug('getdate');
-  let t, ans, jd, a, b, c, d, e, index
+function getdate(elements: number[], circumstances: any[]) {
+  consoleDebug("getdate");
+  let t, ans, jd, a, b, c, d, e, index;
 
-  index = obsvconst[6]
+  index = obsvconst[6];
   // Calculate the JD for noon (TDT) the day before the day that contains T0
-  jd = Math.floor(elements[index] - (elements[1+index]/24.0))
+  jd = Math.floor(elements[index] - elements[1 + index] / 24.0);
   // Calculate the local time (ie the offset in hours since midnight TDT on the day containing T0).
-  t = circumstances[1] + elements[1+index] - obsvconst[3] - (elements[4+index] - 0.5) / 3600.0
+  t =
+    circumstances[1] +
+    elements[1 + index] -
+    obsvconst[3] -
+    (elements[4 + index] - 0.5) / 3600.0;
   if (t < 0.0) {
     jd--;
   }
@@ -690,75 +765,80 @@ function getdate(elements: number[] ,circumstances: any[]) {
     jd++;
   }
   if (jd >= 2299160.0) {
-    a = Math.floor((jd - 1867216.25) / 36524.25)
-    a = jd + 1 + a - Math.floor(a/4);
+    a = Math.floor((jd - 1867216.25) / 36524.25);
+    a = jd + 1 + a - Math.floor(a / 4);
   } else {
     a = jd;
   }
-  b = a + 1525.0
-  c = Math.floor((b-122.1)/365.25)
-  d = Math.floor(365.25*c)
-  e = Math.floor((b - d) / 30.6001)
-  d = b - d - Math.floor(30.6001*e)
+  b = a + 1525.0;
+  c = Math.floor((b - 122.1) / 365.25);
+  d = Math.floor(365.25 * c);
+  e = Math.floor((b - d) / 30.6001);
+  d = b - d - Math.floor(30.6001 * e);
   if (e < 13.5) {
-    e = e - 1
+    e = e - 1;
   } else {
-    e = e - 13
+    e = e - 13;
   }
   if (e > 2.5) {
-    ans = c - 4716 + "-"
+    ans = c - 4716 + "-";
   } else {
-    ans = c - 4715 + "-"
+    ans = c - 4715 + "-";
   }
-  ans += month[e-1] + "-"
+  ans += month[e - 1] + "-";
   if (d < 10) {
-    ans = ans + "0"
+    ans = ans + "0";
   }
-  ans = ans + d
-  return ans
+  ans = ans + d;
+  return ans;
 }
 
 //
 // Get the local time of an event
-function gettime(elements: number[],circumstances: any[]) {
-  consoleDebug('gettime');
-  let t, ans, index
+function gettime(elements: number[], circumstances: any[]) {
+  consoleDebug("gettime");
+  let t, ans, index;
 
-  ans = ""
-  index = obsvconst[6]
-  t = circumstances[1] + elements[1+index] - obsvconst[3] - (elements[4+index] - 0.5) / 3600.0
+  ans = "";
+  index = obsvconst[6];
+  t =
+    circumstances[1] +
+    elements[1 + index] -
+    obsvconst[3] -
+    (elements[4 + index] - 0.5) / 3600.0;
   if (t < 0.0) {
-    t = t + 24.0
+    t = t + 24.0;
   }
   if (t >= 24.0) {
-    t = t - 24.0
+    t = t - 24.0;
   }
   if (t < 10.0) {
-    ans = ans + "0"
+    ans = ans + "0";
   }
-  ans = ans + Math.floor(t) + ":"
-  t = (t * 60.0) - 60.0 * Math.floor(t)
+  ans = ans + Math.floor(t) + ":";
+  t = t * 60.0 - 60.0 * Math.floor(t);
   if (t < 10.0) {
-    ans = ans + "0"
+    ans = ans + "0";
   }
-  ans = ans + Math.floor(t)
-  if (circumstances[40] <= 1) { // not sunrise or sunset
-    ans = ans + ":"
-    t = (t * 60.0) - 60.0 * Math.floor(t)
+  ans = ans + Math.floor(t);
+  if (circumstances[40] <= 1) {
+    // not sunrise or sunset
+    ans = ans + ":";
+    t = t * 60.0 - 60.0 * Math.floor(t);
     if (t < 10.0) {
-      ans = ans + "0"
+      ans = ans + "0";
     }
-    ans = ans + Math.floor(t)
+    ans = ans + Math.floor(t);
   }
   if (circumstances[40] == 1) {
     // below horizon
     return ans;
   } else if (circumstances[40] == 2) {
     // during sunrise
-    return ans+"(r)";
+    return ans + "(r)";
   } else if (circumstances[40] == 3) {
     // during sunset
-    return ans+"(s)";
+    return ans + "(s)";
   } else {
     return ans;
   }
@@ -767,8 +847,8 @@ function gettime(elements: number[],circumstances: any[]) {
 //
 // Get the altitude
 function getalt(circumstances: any[]) {
-  consoleDebug('getalt');
-  let t, ans
+  consoleDebug("getalt");
+  let t, ans;
 
   if (circumstances[40] == 2) {
     return "0(r)";
@@ -776,23 +856,23 @@ function getalt(circumstances: any[]) {
   if (circumstances[40] == 3) {
     return "0(s)";
   }
-  if ((circumstances[32] < 0.0) && (circumstances[32] >= -0.00524)) {
+  if (circumstances[32] < 0.0 && circumstances[32] >= -0.00524) {
     // Crude correction for refraction (and for consistency's sake)
-    t = 0.0
+    t = 0.0;
   } else {
-    t = circumstances[32] * 180.0 / Math.PI
+    t = (circumstances[32] * 180.0) / Math.PI;
   }
   if (t < 0.0) {
-    ans = "-"
-    t = -t
+    ans = "-";
+    t = -t;
   } else {
-    ans = ""
+    ans = "";
   }
-  t = Math.floor(t+0.5)
+  t = Math.floor(t + 0.5);
   if (t < 10.0) {
-    ans = ans + "0"
+    ans = ans + "0";
   }
-  ans = ans + t
+  ans = ans + t;
   if (circumstances[40] == 1) {
     // below horizon
     return ans;
@@ -804,28 +884,28 @@ function getalt(circumstances: any[]) {
 //
 // Get the azimuth
 function getazi(circumstances: any[]) {
-  consoleDebug('getazi');
-  let t, ans
+  consoleDebug("getazi");
+  let t, ans;
 
-  ans = ""
-  t = circumstances[35] * 180.0 / Math.PI
+  ans = "";
+  t = (circumstances[35] * 180.0) / Math.PI;
   if (t < 0.0) {
-    t = t + 360.0
+    t = t + 360.0;
   }
   if (t >= 360.0) {
-    t = t - 360.0
+    t = t - 360.0;
   }
-  t = Math.floor(t + 0.5)
+  t = Math.floor(t + 0.5);
   if (t < 100.0) {
-    ans = ans + "0"
+    ans = ans + "0";
   }
   if (t < 10.0) {
-    ans = ans + "0"
+    ans = ans + "0";
   }
-  ans = ans + t
+  ans = ans + t;
   if (circumstances[40] == 1) {
     // below horizon
-   return ans;
+    return ans;
   } else {
     return ans;
   }
@@ -836,72 +916,77 @@ function getazi(circumstances: any[]) {
 //
 // Adapted from code written by Stephen McCann - 27/04/2001
 function getduration() {
-  consoleDebug('getduration');
-  let tmp,ans;
-  
+  consoleDebug("getduration");
+  let tmp, ans;
+
   if (c3[40] == 4) {
-    tmp = mid[1]-c2[1]
+    tmp = mid[1] - c2[1];
   } else if (c2[40] == 4) {
-    tmp = c3[1]-mid[1]
+    tmp = c3[1] - mid[1];
   } else {
-    tmp=c3[1]-c2[1];
+    tmp = c3[1] - c2[1];
   }
-  if (tmp<0.0) {
-    tmp=tmp+24.0
+  if (tmp < 0.0) {
+    tmp = tmp + 24.0;
   } else if (tmp >= 24.0) {
-    tmp=tmp-24.0
+    tmp = tmp - 24.0;
   }
-  tmp=(tmp*60.0)-60.0*Math.floor(tmp)+0.05/60.0;
-  ans=Math.floor(tmp)+"m"
-  tmp=(tmp*60.0)-60.0*Math.floor(tmp)
+  tmp = tmp * 60.0 - 60.0 * Math.floor(tmp) + 0.05 / 60.0;
+  ans = Math.floor(tmp) + "m";
+  tmp = tmp * 60.0 - 60.0 * Math.floor(tmp);
   if (tmp < 10.0) {
-    ans=ans+"0"
+    ans = ans + "0";
   }
-  ans+=Math.floor(tmp)+"s"
-  return ans
+  ans += Math.floor(tmp) + "s";
+  return ans;
 }
 
 //
 // Get the magnitude
 function getmagnitude() {
-  consoleDebug('getmagnitude');
-  let a, mag
+  consoleDebug("getmagnitude");
+  let a, mag;
 
-  a = Math.floor(1000.0*mid[37]+0.5)/1000.0
+  a = Math.floor(1000.0 * mid[37] + 0.5) / 1000.0;
   if (mid[40] == 1) {
-    mag = a
+    mag = a;
   }
   if (mid[40] == 2) {
     // during sunrise
-    mag = a + "(r)"
+    mag = a + "(r)";
   }
   if (mid[40] == 3) {
     // during sunset
-    mag = a + "(s)"
+    mag = a + "(s)";
   }
-  return mag
+  return mag;
 }
 
 //
 // Get the coverage
 function getcoverage() {
-  consoleDebug('getcoverage');
-  let a, b, c
+  consoleDebug("getcoverage");
+  let a, b, c;
 
   if (mid[37] <= 0.0) {
-    a = "0.0"
+    a = "0.0";
   } else if (mid[37] >= 1.0) {
-    a = "1.000"
+    a = "1.000";
   } else {
     if (mid[39] == 2) {
-      c = mid[38] * mid[38]
+      c = mid[38] * mid[38];
     } else {
-      c = Math.acos((mid[28]*mid[28] + mid[29]*mid[29] - 2.0*mid[36]*mid[36]) / (mid[28]*mid[28] - mid[29]*mid[29]))
-      b = Math.acos((mid[28]*mid[29] + mid[36]*mid[36])/mid[36]/(mid[28]+mid[29]))
-      a = Math.PI - b - c
-      c = ((mid[38]*mid[38]*a + b) - mid[38]*Math.sin(c))/Math.PI
+      c = Math.acos(
+        (mid[28] * mid[28] + mid[29] * mid[29] - 2.0 * mid[36] * mid[36]) /
+          (mid[28] * mid[28] - mid[29] * mid[29])
+      );
+      b = Math.acos(
+        (mid[28] * mid[29] + mid[36] * mid[36]) / mid[36] / (mid[28] + mid[29])
+      );
+      a = Math.PI - b - c;
+      c = (mid[38] * mid[38] * a + b - mid[38] * Math.sin(c)) / Math.PI;
     }
-    a = Math.floor(1000.0*c+0.5)/1000.0
+    a = Math.floor(1000.0 * c + 0.5) / 1000.0;
   }
   if (mid[40] == 1) {
     // below horizon
@@ -909,42 +994,42 @@ function getcoverage() {
   }
   if (mid[40] == 2) {
     // during sunrise
-    a = a + "(r)"
+    a = a + "(r)";
   }
   if (mid[40] == 3) {
     // during sunset
-    a = a + "(s)"
+    a = a + "(s)";
   }
   return a;
 }
 
 function clearoldresults() {
-  consoleDebug('clearoldresults');
+  consoleDebug("clearoldresults");
   return;
 }
 
 // CALCULATE!
 function calculatefor(el: number[]) {
-  consoleDebug('calculatefor');
-  readform()
+  consoleDebug("calculatefor");
+  readform();
   clearoldresults();
-  
+
   const o = {
-    'date': '',
-    'type': '',
-    'partialStart': '',
-    'sunAltStart': '',
-    'centralTime': '',
-    'maxTime': '',
-    'maxAlt': '',
-    'maxAzi': '',
-    'centralEnd': '' ,
-    'partialEnd': '',
-    'sunAltEnd': '',
-    'magnitude': '',
-    'duration': '',
+    date: "",
+    type: "",
+    partialStart: "",
+    sunAltStart: "",
+    centralTime: "",
+    maxTime: "",
+    maxAlt: "",
+    maxAzi: "",
+    centralEnd: "",
+    partialEnd: "",
+    sunAltEnd: "",
+    magnitude: "",
+    duration: "",
   } as Record<string, string | number>;
-  
+
   // ("Calendar Date"));
   // ("Eclipse Type"));
   // ("Partial Eclipse Begins"));
@@ -960,14 +1045,13 @@ function calculatefor(el: number[]) {
   // ("Eclipse Obs."));
   // ("A or T Eclipse Duration"));
 
-  for (let i = 0 ; i < el.length ; i+=28) {
-    let val, row, td, tbody
-    obsvconst[6]=i;
-    getall(el)
+  for (let i = 0; i < el.length; i += 28) {
+    let val, row, td, tbody;
+    obsvconst[6] = i;
+    getall(el);
     // Is there an event...
     if (mid[39] > 0) {
-
-      o.date = getdate(el,mid);
+      o.date = getdate(el, mid);
       if (mid[39] == 1) {
         o.type = "P";
       } else if (mid[39] == 2) {
@@ -978,106 +1062,121 @@ function calculatefor(el: number[]) {
 
       // Partial eclipse start
       if (c1[40] == 4) {
-        continue
+        continue;
       } else {
-    // Partial eclipse start time
-        o.partialStart = gettime(el,c1);
+        // Partial eclipse start time
+        o.partialStart = gettime(el, c1);
         o.sunAltStart = getalt(c1);
       }
-  // Central eclipse time
-  if ((mid[39] > 1) && (c2[40] != 4)) {
-        o.centralTime = gettime(el,c2);
-  } else {
-    val = null;
-  }
-  
-  
-  // Maximum eclipse time
-  o.maxTime = gettime(el,mid);
-  // Maximum eclipse alt
-  o.maxAlt = getalt(mid);
-  // Maximum eclipse azi
-  o.maxAzi = getazi(mid);
+      // Central eclipse time
+      if (mid[39] > 1 && c2[40] != 4) {
+        o.centralTime = gettime(el, c2);
+      } else {
+        val = null;
+      }
 
-  // Central eclipse ends
-  if ((mid[39] > 1) && (c3[40] != 4)) {
-    o.centralEnd = gettime(el,c3);
-  } else {
-    o.centralEnd = '';
-  }
+      // Maximum eclipse time
+      o.maxTime = gettime(el, mid);
+      // Maximum eclipse alt
+      o.maxAlt = getalt(mid);
+      // Maximum eclipse azi
+      o.maxAzi = getazi(mid);
+
+      // Central eclipse ends
+      if (mid[39] > 1 && c3[40] != 4) {
+        o.centralEnd = gettime(el, c3);
+      } else {
+        o.centralEnd = "";
+      }
 
       // Partial eclipse ends
       if (c4[40] == 4) {
-        continue
+        continue;
       } else {
-    // Partial eclipse ends
-    o.partialEnd = gettime(el,c4);
-    o.sunAltEnd = getalt(c4);
-
+        // Partial eclipse ends
+        o.partialEnd = gettime(el, c4);
+        o.sunAltEnd = getalt(c4);
       }
-  // Eclipse magnitude
-  o.magnitude = getcoverage();
-  
-  if (mid[39] > 1) {
-    o.duration = getduration();
-  } else {
-    o.duration = '';
-  }
+      // Eclipse magnitude
+      o.magnitude = getcoverage();
 
+      if (mid[39] > 1) {
+        o.duration = getduration();
+      } else {
+        o.duration = "";
+      }
     }
     console.log(o);
   }
 }
 
-function init() {
-}
-
+function init() {}
 
 function citychange() {
   clearoldresults();
   let index = Number(eclipseform.cityndx.value);
   if (index <= 0) return;
-  let hemisphere=0;
+  let hemisphere = 0;
   eclipseform.loc_name = cities[index++];
   let val = cities[index++];
-  if (val < 0) { val=-val; hemisphere=1; }
+  if (val < 0) {
+    val = -val;
+    hemisphere = 1;
+  }
   eclipseform.latd = val;
   val = cities[index++];
-  if (val < 0) { val=-val; hemisphere=1; }
+  if (val < 0) {
+    val = -val;
+    hemisphere = 1;
+  }
   eclipseform.latm = val;
   val = cities[index++];
-  if (val < 0) { val=-val; hemisphere=1; }
+  if (val < 0) {
+    val = -val;
+    hemisphere = 1;
+  }
   eclipseform.lats = val;
   eclipseform.latx.selectedIndex = hemisphere;
-  hemisphere=0;
+  hemisphere = 0;
   val = cities[index++];
-  if (val < 0) { val=-val; hemisphere=1; }
+  if (val < 0) {
+    val = -val;
+    hemisphere = 1;
+  }
   eclipseform.lond = val;
   val = cities[index++];
-  if (val < 0) { val=-val; hemisphere=1; }
+  if (val < 0) {
+    val = -val;
+    hemisphere = 1;
+  }
   eclipseform.lonm = val;
   val = cities[index++];
-  if (val < 0) { val=-val; hemisphere=1; }
+  if (val < 0) {
+    val = -val;
+    hemisphere = 1;
+  }
   eclipseform.lons = val;
   eclipseform.lonx.selectedIndex = hemisphere;
-  eclipseform.alt=cities[index++];
+  eclipseform.alt = cities[index++];
   val = cities[index];
   if (val < 0) {
-    eclipseform.tzx.selectedIndex=1;
+    eclipseform.tzx.selectedIndex = 1;
     val = -val;
   } else {
-    eclipseform.tzx.selectedIndex=0;
+    eclipseform.tzx.selectedIndex = 0;
   }
   eclipseform.tzh.selectedIndex = Math.floor(val);
-  eclipseform.tzm.selectedIndex = Math.floor(4*(val-eclipseform.tzh.selectedIndex)+0.5);
+  eclipseform.tzm.selectedIndex = Math.floor(
+    4 * (val - eclipseform.tzh.selectedIndex) + 0.5
+  );
 }
 
 function newloc() {
-  eclipseform.cityndx.selectedIndex=0;
+  eclipseform.cityndx.selectedIndex = 0;
   clearoldresults();
 }
 
-import {SE2001} from "./SE2001";
+import { SE2001 } from "./SE2001";
 
 function settimeperiod(timeperiod: string) {
   recalculate();
