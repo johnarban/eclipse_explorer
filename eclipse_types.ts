@@ -82,22 +82,59 @@ export type Altitude = number;
 export type Timezone = number;
 
 export type SunBSR = 'b' | 's' | 'r' | null;
-export type BSRArray = [(number | string)?, SunBSR?];
+export type BSRArray<T> = [T, SunBSR];
 
-export interface EclipseData {
+
+
+export interface PartialEclipseData<TimeType>{
   date: string;
-  type: 'P' | 'A' | 'T' | "";
-  partialStart: BSRArray;
-  sunAltStart: BSRArray;
-  centralTime: BSRArray;
-  maxTime: BSRArray;
-  maxAlt: BSRArray;
+  type: 'P';
+  centralStart: BSRArray<TimeType extends Date ? null : ''>;
+  centralEnd: BSRArray<TimeType extends Date ? null : ''>;
+  partialStart: BSRArray<TimeType>;
+  sunAltStart: BSRArray<number>;
+  maxTime: BSRArray<TimeType>;
+  maxAlt: BSRArray<number>;
   maxAzi: number;
-  centralEnd: BSRArray;
-  partialEnd: BSRArray;
-  sunAltEnd: BSRArray;
-  magnitude: BSRArray;
-  coverage: BSRArray;
+  partialEnd: BSRArray<TimeType>;
+  sunAltEnd: BSRArray<number>;
+  magnitude: BSRArray<number>;
+  coverage: BSRArray<number>;
   duration: string;
 }
 
+export interface TotalAnnularEclipseData<TimeType> {
+  date: string;
+  type: 'T' | 'A';
+  centralStart: BSRArray<TimeType>;
+  centralEnd: BSRArray<TimeType>;
+  partialStart: BSRArray<TimeType>;
+  sunAltStart: BSRArray<number>;
+  maxTime: BSRArray<TimeType>;
+  maxAlt: BSRArray<number>;
+  maxAzi: number;
+  partialEnd: BSRArray<TimeType>;
+  sunAltEnd: BSRArray<number>;
+  magnitude: BSRArray<number>;
+  coverage: BSRArray<number>;
+  duration: string;
+}
+
+export interface NoEclipseData<TimeType> {
+  date: '';
+  type: '';
+  partialStart: BSRArray<TimeType extends Date ? null : ''>;
+  sunAltStart: BSRArray<0>;
+  centralStart: BSRArray<TimeType extends Date ? null : ''>;
+  maxTime: BSRArray<TimeType extends Date ? null : ''>;
+  maxAlt: BSRArray<0>;
+  maxAzi: 0;
+  centralEnd: BSRArray<TimeType extends Date ? null : ''>;
+  partialEnd: BSRArray<TimeType extends Date ? null : ''>;
+  sunAltEnd: BSRArray<0>;
+  magnitude: BSRArray<0>;
+  coverage: BSRArray<0>;
+  duration: '';
+}
+
+export type EclipseData<TimeType> = PartialEclipseData<TimeType> | TotalAnnularEclipseData<TimeType> | NoEclipseData<TimeType>;
