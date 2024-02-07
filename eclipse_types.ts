@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export type EclipseForm = {
   latd: number;
@@ -69,7 +70,7 @@ export class Observer {
   }
   
   getObserverConstants(): [number, number, number, number, number, number] {
-    return [this.latRad, this.lonRad, this.alt, this.tz, ...this.getGeo()]
+    return [this.latRad, this.lonRad, this.alt, this.tz, ...this.getGeo()];
   }
     
 }
@@ -81,7 +82,7 @@ export type Altitude = number;
 export type Timezone = number;
 
 export type SunBSR = 'b' | 's' | 'r' | null;
-export type BSRArray = [(number | string)?, SunBSR?]
+export type BSRArray = [(number | string)?, SunBSR?];
 
 export interface EclipseData {
   date: string;

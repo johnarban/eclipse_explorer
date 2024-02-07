@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -24,13 +25,33 @@ This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
+
+
+Typescript version by John Arban Lewis 2024
+Github: @johnarban
+https://github.com/johnarban/eclipse_explorer
+(Based on the Javascript Solar Eclipse Explorer by Chris O'Byrne and Fred Espenak - 2007)
+This is released under the same terms as the original code.
+This version is a direct port of the original code to typescript with minimal changes and retains
+the original comments and structure. The original code can be found at:
+https://eclipse.gsfc.nasa.gov/JSEX/program.js
+The major changes include:
+  - Removing all references to the document object
+     - The eclipseform is now an global object
+  - Two new functions `recalculateForObserver` and `recalculcateForObserverUTC` have been added
+     - These rely on the new `setObserver` and Observer class. The rest of the function continues to use the global observer array. 
+        The Observer class is a convenient container and allowed easier abstraction of the observer data.
+TODO:
+  - The observer class should be used throughout the code
+  - Remove reliance on global variables
+  - Use Date objects to store the times (instead of strings)
+  - Properly handle the timezone, or else always use UTC, and only convert to local time for display
 */
 
 
 import { EclipseForm, Observer, SunBSR,BSRArray, EclipseData } from "./eclipse_types";
-import { SE2001 } from "./SE2001";
 import { SE2024 } from "./SE2024";
-
+export { EclipseForm, Observer, SunBSR,BSRArray, EclipseData };
 //
 // Observer constants -
 // (0) North Latitude (radians)
@@ -1115,22 +1136,21 @@ function consoleDebug(...data: any[]) {
 // recalculate();
 
 
-function recalculateForObserver(latDeg: number, latDir: 'N' | 'S', lonDeg: number, lonDir: 'E' | 'W', alt: number, tz: number, tzDir: 'W' | 'E') {
-  const latSign = eclipseform.latx.options[latDir]
-  const lonSign = eclipseform.lonx.options[lonDir]
-  const tzSign = eclipseform.tzx.options[tzDir]
+export function recalculateForObserver(latDeg: number, latDir: 'N' | 'S', lonDeg: number, lonDir: 'E' | 'W', alt: number, tz: number, tzDir: 'W' | 'E') {
+  const latSign = eclipseform.latx.options[latDir];
+  const lonSign = eclipseform.lonx.options[lonDir];
+  const tzSign = eclipseform.tzx.options[tzDir];
   setObserver(latSign * Math.abs(latDeg), lonSign * Math.abs(lonDeg), alt, tzSign * Math.abs(tz));
   const result = calculatefor(SE2024());
   console.log(result);
 }
 
-function recalculateForObserverUTC(latDeg: number, latDir: 'N' | 'S', lonDeg: number, lonDir: 'E' | 'W', alt: number) {
-  const latSign = eclipseform.latx.options[latDir]
-  const lonSign = eclipseform.lonx.options[lonDir]
-  setObserver(latSign * Math.abs(latDeg), lonSign * Math.abs(lonDeg), alt, 0);
+
+export function recalculateForObserverUTC(latDeg: number, lonDeg: number, alt: number) {
+  // use UTC timezone and correct longitude for the the West positive convention used in the code
+  setObserver(latDeg, -lonDeg, alt, 0);
   const result = calculatefor(SE2024());
   console.log(result);
+  return result;
 }
 
-// only run the following code if we are in a node environment
-recalculateForObserverUTC(32.783, 'N', 96.800, 'W', 137); // Dallas, TX
