@@ -83,14 +83,14 @@ export type Timezone = number;
 
 export type SunBSR = 'b' | 's' | 'r' | null;
 export type BSRArray<T> = [T, SunBSR];
-
+type ConditionalNullBSRArray<TimeType, R=null, X=''> = TimeType extends Date ? BSRArray<R> : BSRArray<X>;
 
 
 export interface PartialEclipseData<TimeType>{
   date: string;
   type: 'P';
-  centralStart: BSRArray<TimeType extends Date ? null : ''>;
-  centralEnd: BSRArray<TimeType extends Date ? null : ''>;
+  centralStart: ConditionalNullBSRArray<TimeType>;
+  centralEnd: ConditionalNullBSRArray<TimeType>;
   partialStart: BSRArray<TimeType>;
   sunAltStart: BSRArray<number>;
   maxTime: BSRArray<TimeType>;
@@ -123,14 +123,14 @@ export interface TotalAnnularEclipseData<TimeType> {
 export interface NoEclipseData<TimeType> {
   date: '';
   type: '';
-  partialStart: BSRArray<TimeType extends Date ? null : ''>;
+  partialStart: ConditionalNullBSRArray<TimeType>;
   sunAltStart: BSRArray<0>;
-  centralStart: BSRArray<TimeType extends Date ? null : ''>;
-  maxTime: BSRArray<TimeType extends Date ? null : ''>;
+  centralStart: ConditionalNullBSRArray<TimeType>;
+  maxTime: ConditionalNullBSRArray<TimeType>;
   maxAlt: BSRArray<0>;
   maxAzi: 0;
-  centralEnd: BSRArray<TimeType extends Date ? null : ''>;
-  partialEnd: BSRArray<TimeType extends Date ? null : ''>;
+  centralEnd: ConditionalNullBSRArray<TimeType>;
+  partialEnd: ConditionalNullBSRArray<TimeType>;
   sunAltEnd: BSRArray<0>;
   magnitude: BSRArray<0>;
   coverage: BSRArray<0>;
